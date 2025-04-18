@@ -14,7 +14,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV LOG4J_FORMAT_MSG_NO_LOOKUPS=true
 ENV CONTAINER_USER=renoder
-ARG CONTAINER_UID=1010
+ARG CONTAINER_UID=1001
 ARG USER_HOMEDIR=/home/${CONTAINER_USER}
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo UTC > /etc/timezone
