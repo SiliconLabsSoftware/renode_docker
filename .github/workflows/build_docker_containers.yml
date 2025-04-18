@@ -27,6 +27,11 @@ jobs:
           repository: SiliconLabsSoftware/renode
           path: renode
 
+      # DEBUG 
+      - name: Check runner uid
+        run: |
+          echo "Runner's uid is $(id -u)"
+
       # Test checkout (DEBUG)
       #- name: Test repositories checkout
       #  run: |
@@ -36,30 +41,30 @@ jobs:
       #    ls renode_docker
 
       # build renode in same environment that renode container will use
-      - name: Build renode_build container
-        working-directory: renode_docker/containers/renode_build
-        run: |
-          docker build --platform linux/amd64 --no-cache --build-arg CONTAINER_UID=1010 -t siliconlabsinc/renode_build:latest .
+      # - name: Build renode_build container
+      #  working-directory: renode_docker/containers/renode_build
+      #  run: |
+      #    docker build --platform linux/amd64 --no-cache --build-arg CONTAINER_UID=$(id -u) -t siliconlabsinc/renode_build:latest .
 
-      - name: Build renode inside renode_build container and validate installation
-        run: |
-          docker run --rm --platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest bash -c 'git config --global --add safe.directory /opt/renode; cd /opt/renode; ./build.sh -p'
-          docker run --rm --platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest bash -c 'git config --global --add safe.directory /opt/renode; cd /opt/renode; ./renode --version'
+      # - name: Build renode inside renode_build container and validate installation
+      #   run: |
+      #     docker run --rm --platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest bash -c 'cd /opt/renode; ./build.sh -p'
+      #     docker run --rm --platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest bash -c 'cd /opt/renode; ./renode --version'
 
-      - name: Move output renode package 
-        run: |
-          mv -v renode/output/packages/renode_*_amd64.deb renode_docker/containers/renode/silabs-renode.deb
+      # - name: Move output renode package 
+      #   run: |
+      #     mv -v renode/output/packages/renode_*_amd64.deb renode_docker/containers/renode/silabs-renode.deb
 
-      - name: Build renode container
-        working-directory: renode_docker/containers/renode
-        run: |
-          docker build --platform linux/amd64 --no-cache --build-arg CONTAINER_UID=1010 -t siliconlabsinc/renode:latest .
+      # - name: Build renode container
+      #   working-directory: renode_docker/containers/renode
+      #   run: |
+      #     docker build --platform linux/amd64 --no-cache --build-arg CONTAINER_UID=$(id -u) -t siliconlabsinc/renode:latest .
 
-      - name: Validate renode from inside renode container
-        run: |
-          docker run --rm --platform linux/amd64 siliconlabsinc/renode:latest bash -c 'renode-test /opt/renode/tests/example.robot'
+      # - name: Validate renode from inside renode container
+      #   run: |
+      #     docker run --rm --platform linux/amd64 siliconlabsinc/renode:latest bash -c 'renode-test /opt/renode/tests/example.robot'
 
-      ##To be enabled once builds are verified
-      ##- name: Push container to dockerhub
-      ##  run: |
-      ##    docker image push siliconlabsinc/renode:latest
+      # To be enabled once builds are verified
+      # - name: Push container to dockerhub
+      #   run: |
+      #     docker image push siliconlabsinc/renode:latest
