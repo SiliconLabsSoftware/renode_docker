@@ -1,27 +1,26 @@
-# This is a basic workflow to help you get started with Actions
-
 name: build_docker_containers
 
 # Controls when the workflow will run
 on:
-  # Allows you to run this workflow manually from the Actions tab
+  # Run this manually to enable testing, but event setup for auto-trigger will also be complicated
+  # (since action should track a different repo than it lives in)
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
+    # standard github runner
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Check out docker-specific repo
       - name: Checkout renode_docker
         uses: actions/checkout@v4
         with:
           path: renode_docker
       
+      # Check out renode repo itself
       - name: Checkout renode repo
         uses: actions/checkout@v4
         with:
@@ -29,10 +28,38 @@ jobs:
           path: renode
 
       # Test checkout (DEBUG)
-      - name: Test repositories checkout
-        run: |
-          pwd
-          ls
-          ls renode
-          ls renode_docker
+      #- name: Test repositories checkout
+      #  run: |
+      #    pwd
+      #    ls
+      #    ls renode
+      #    ls renode_docker
 
+      # build renode in same environment that renode container will use
+      - name: Build renode_build container
+        working-directory: renode_docker/containers/renode_build
+        run: |
+          docker build —platform linux/amd64 —no-cache —build-arg CONTAINER_UID=1010 -t siliconlabsinc/renode_build:latest
+
+      - name: Build renode inside renode_build container and validate installation
+        run: |
+          docker run —rm —platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest 'cd /opt/renode; ./build.sh -p'
+          docker run —rm —platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest 'cd /opt/renode; ./renode --version'
+
+      - name: Move output renode package 
+        run: |
+          mv -v renode/output/packages/renode_*_amd64.deb renode_docker/containers/renode/silabs-renode.deb
+
+      - name: Build renode container
+        working-directory: renode_docker/containers/renode
+        run: |
+          docker build —platform linux/amd64 —no-cache —build-arg CONTAINER_UID=1010 -t siliconlabsinc/renode:latest
+
+      - name: Validate renode from inside renode container
+        run: |
+          docker run —rm —platform linux/amd64 siliconlabsinc/renode:latest 'renode-test /opt/renode/tests/example.robot'
+
+      ##To be enabled once builds are verified
+      ##- name: Push container to dockerhub
+      ##  run: |
+      ##    docker image push siliconlabsinc/renode:latest
