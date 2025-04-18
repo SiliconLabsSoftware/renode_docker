@@ -1,7 +1,7 @@
 # Dockerfile to run Renode, built from SiLabs public fork
 # Currently uses Mono-built Renode and only supports x86_64 Linux architecture.
 
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 
 # -----------------------------------------------------------------------------
 # metadata

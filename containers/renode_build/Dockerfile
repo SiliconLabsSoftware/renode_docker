@@ -2,7 +2,7 @@
 #Currently this only supports x86_64/amd64 architecture and building Renode with Mono,
 #but future support for .NET and ARM64 is planned.
 
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 
 # -----------------------------------------------------------------------------
 # metadata
