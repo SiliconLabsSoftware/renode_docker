@@ -43,8 +43,8 @@ jobs:
 
       - name: Build renode inside renode_build container and validate installation
         run: |
-          docker run --rm --platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest bash -c 'cd /opt/renode; ./build.sh -p'
-          docker run --rm --platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest bash -c 'cd /opt/renode; ./renode --version'
+          docker run --rm --platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest bash -c 'git config --global --add safe.directory /opt/renode; cd /opt/renode; ./build.sh -p'
+          docker run --rm --platform linux/amd64 -v $GITHUB_WORKSPACE/renode:/opt/renode siliconlabsinc/renode_build:latest bash -c 'git config --global --add safe.directory /opt/renode; cd /opt/renode; ./renode --version'
 
       - name: Move output renode package 
         run: |
