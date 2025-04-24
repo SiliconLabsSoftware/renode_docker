@@ -6,6 +6,10 @@ on:
   # (since action should track a different repo than it lives in)
   workflow_dispatch:
 
+env: 
+  #temporary
+  DOCKER_REPO: cxlight/cxlight-dockertest
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -31,7 +35,7 @@ jobs:
       - name: Build renode_build container
         working-directory: renode_docker/containers/renode_build
         run: |
-         docker build --platform linux/amd64 --no-cache --build-arg CONTAINER_UID=$(id -u) -t siliconlabsinc/renode_build:latest .
+         docker build --platform linux/amd64 --no-cache --build-arg CONTAINER_UID=$(id -u) -t $DOCKER_REPO:renode_build .
 
       - name: Build renode inside renode_build container and validate installation
         run: |
@@ -51,13 +55,20 @@ jobs:
       - name: Build renode container
         working-directory: renode_docker/containers/renode
         run: |
-          docker build --platform linux/amd64 --no-cache --build-arg CONTAINER_UID=$(id -u) -t siliconlabsinc/renode:latest .
+          docker build --platform linux/amd64 --no-cache --build-arg CONTAINER_UID=$(id -u) -t $DOCKER_REPO:renode .
 
       - name: Validate renode from inside renode container
         run: |
-          docker run --rm --platform linux/amd64 siliconlabsinc/renode:latest bash -c 'renode-test /opt/renode/tests/example.robot'
+          docker run --rm --platform linux/amd64 $DOCKER_REPO:renode bash -c 'renode-test /opt/renode/tests/example.robot'
 
-      # To be enabled once builds are verified
-      # - name: Push container to dockerhub
-      #   run: |
-      #     docker image push siliconlabsinc/renode:latest
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          #temporary
+          username: ${{ vars.CXLIGHT_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.CXLIGHT_DOCKERHUB_TOKEN }}
+
+
+      - name: Push container to dockerhub
+        run: |
+          docker image push $DOCKER_REPO:renode
