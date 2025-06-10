@@ -6,8 +6,8 @@ on:
   # (since action should track a different repo than it lives in)
   workflow_dispatch:
 
-env: 
-  DOCKER_REPO: siliconlabsinc/renode_container
+env:
+  DOCKER_REPO: ${{ secrets.SILABSW_PUBLIC_DOCKER_USERNAME }}/renode_container
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -70,4 +70,5 @@ jobs:
       - name: Push container to dockerhub
         if: github.ref == 'refs/heads/main'
         run: |
+          docker images
           docker image push $DOCKER_REPO:renode
